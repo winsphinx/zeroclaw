@@ -20,11 +20,13 @@ jobs:
           - target: aarch64-unknown-linux-gnu   # ARM64：ARM服务器（交叉编译）
             cross: true
             gcc_pkg: gcc-aarch64-linux-gnu
+            gxx_pkg: g++-aarch64-linux-gnu
             libc_pkg: libc6-dev-arm64-cross
             tool_prefix: aarch64-linux-gnu
           - target: x86_64-unknown-linux-gnu    # AMD64：原生，无需交叉工具链
             cross: false
             gcc_pkg: ""
+            gxx_pkg: ""
             libc_pkg: ""
             tool_prefix: ""
 
@@ -44,7 +46,9 @@ jobs:
           sudo apt-get update
           # gcc 是交叉编译器，libc6-dev-*-cross 是对应架构的 C 库头文件
           # （ring 等 crate 编 C 代码时需要，缺了会报 bits/libc-header-start.h 找不到）
-          sudo apt-get install -y --no-install-recommends ${{ matrix.gcc_pkg }} ${{ matrix.libc_pkg }}
+          # g++ 是 C++ 交叉编译器（zerocode 依赖树里有 crate 用 cc-rs 编 C++ 代码，
+          # 缺了会报 failed to find tool "aarch64-linux-gnu-g++"）
+          sudo apt-get install -y --no-install-recommends ${{ matrix.gcc_pkg }} ${{ matrix.gxx_pkg }} ${{ matrix.libc_pkg }}
 
       - name: Set cross linker
         if: matrix.cross
