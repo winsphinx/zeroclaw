@@ -61,22 +61,30 @@ jobs:
           key: ${{ matrix.target }}
 
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }} --features "$EXTRA_FEATURES"
+        run: |
+          # 主二进制（根包；channel-qq 等 feature 只对它有效）
+          cargo build --release --target ${{ matrix.target }} --features "$EXTRA_FEATURES"
+          # zerocode TUI（独立二进制，无 feature，直接 -p 指定）
+          cargo build --release --target ${{ matrix.target }} -p zerocode
 
       - name: Verify and strip
         run: |
-          bin="target/${{ matrix.target }}/release/zeroclaw"
-          file "$bin"
-          if [ -n "${{ matrix.tool_prefix }}" ]; then
-            "${{ matrix.tool_prefix }}-strip" "$bin" || true
-          else
-            strip "$bin" || true
-          fi
-          ls -lh "$bin"
+          for name in zeroclaw zerocode; do
+            bin="target/${{ matrix.target }}/release/$name"
+            file "$bin"
+            if [ -n "${{ matrix.tool_prefix }}" ]; then
+              "${{ matrix.tool_prefix }}-strip" "$bin" || true
+            else
+              strip "$bin" || true
+            fi
+            ls -lh "$bin"
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: zeroclaw-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/zeroclaw
+          path: |
+            target/${{ matrix.target }}/release/zeroclaw
+            target/${{ matrix.target }}/release/zerocode
           if-no-files-found: error
