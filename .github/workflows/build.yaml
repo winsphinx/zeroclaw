@@ -7,7 +7,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   # 在此处添加额外的 cargo feature，多个用空格分隔
-  EXTRA_FEATURES: "channel-qq"
+  EXTRA_FEATURES: "channel-qq plugins-wasm-cranelift"
 
 jobs:
   build:
