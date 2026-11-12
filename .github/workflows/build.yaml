@@ -7,7 +7,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   # 在此处添加额外的 cargo feature，多个用空格分隔
-  EXTRA_FEATURES: "channel-qq plugins-wasm-cranelift tools-external"
+  EXTRA_FEATURES: "channel-qq plugins-wasm-cranelift tools-external embedded-web"
 
 jobs:
   build:
@@ -64,6 +64,14 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
+      - name: Install Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Build web dashboard
+        run: cargo run -p xtask --bin web -- build
+        
       - name: Build
         run: |
           # 主二进制（根包；channel-qq 等 feature 只对它有效）
